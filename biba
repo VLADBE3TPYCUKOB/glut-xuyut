@@ -1,0 +1,109 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <map>
+#include <random>
+#include <algorithm>
+#include <random>
+#include "glut.h"
+
+using namespace std;
+
+struct point {
+	double x, y;
+	point operator+ (point B) {
+		point res;
+		res.x = x + B.x;
+		res.y = y + B.y;
+		return res;
+	}
+	point operator- (point B) {
+		point res;
+		res.x = x - B.x;
+		res.y = y - B.y;
+		return res;
+	}
+	point operator*(double k) {
+		point res;
+		res.x = k * x;
+		res.y = k * y;
+		return res;
+	}
+};
+
+void init() //цвет бекграунда
+{
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+}
+
+void display()
+{
+	ifstream file_in("input.txt");
+	ofstream file_out("output.txt");
+	int n, m;
+	file_in >> n >> m;
+	vector<point> A(n);
+	vector<point> B(m);
+	double minimum = 10000000;
+	int indexa, indexb;
+	for (int i = 0; i < n; i++)
+	{
+		file_in >> A[i].x >> A[i].y;
+	}
+	for (int i = 0; i < m; i++)
+	{
+		file_in >> B[i].x >> B[i].y;
+	}
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < m; j++)
+		{
+			if ((pow(A[i].x + B[i].x, 2) + pow(A[j].y + B[j].y, 2)) != 0)
+			{
+				minimum = min(minimum, (pow(A[i].x + B[i].x, 2) + pow(A[j].y + B[j].y, 2)));
+				indexa = i;
+				indexb = j;
+			}
+		}
+	}
+	glClear(GL_COLOR_BUFFER_BIT); //рисует
+	glLoadIdentity(); //ресетит систему координат
+	glPointSize(4.0);
+	glColor3f(1.0, 0.0, 0.0); //красные - первое множество
+	glBegin(GL_POINTS);
+	glVertex2f(0.0, 50.0);
+	glVertex2f(40.0, -30.0);
+	glVertex2f(-40.0, 30.0);
+	//glBegin(GL_POINTS, GL_TRIANGLES, GL_POLYGON(все точки), GL_QUADRILATERLS); начало, инициализируем че рисуем
+	/*glVertex2f(5, 5);
+	glVertex2f(-5, -5);*/
+	glEnd();//конец присования
+	glColor3f(0.0, 0.0, 1.0); //синие - второе
+	glBegin(GL_POINTS);
+	glVertex2f(0.0, 0.0);
+	glVertex2f(95.0, 95.0);
+	glEnd();
+	glFlush(); //выводит
+}
+
+void reshape(int w, int h) //изменение места, где рисуем
+{
+	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(-100, 100, -100, 100);
+	glMatrixMode(GL_MODELVIEW);
+}
+
+int main(int argc, char* argv[])
+{
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_RGB);
+	glutInitWindowPosition(200, 100);
+	glutInitWindowSize(500, 500);
+	glutCreateWindow("Nazvanie okna");
+	glutDisplayFunc(display);
+	glutReshapeFunc(reshape);
+	init();
+	glutMainLoop();
+}
